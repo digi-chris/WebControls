@@ -5,7 +5,7 @@ A lightweight framework bringing Object-Oriented, reusable mixed-format controls
 
 Out of frustration over the number of different frameworks there are knocking about, all with their own complexities and weird issues, breaking changes, build workflows, command-line tools and random inexplicable behaviour, I decided that what the world really needed was another framework.
 
-This framework is a bit different, however. I don't see it as a full framework, but just a simple helper library to let you create controls that you'll want to reuse throughout your web application.
+WebControls (working title) is a bit different, however. I don't see it as a full framework, but just a simple helper library to let you create controls that you'll want to reuse throughout your web application.
 
 The idea is that it doesn't rely on any underlying frameworks (other than JavaScript, HTML5 and CSS), can be bolted on top of whatever else you're using, and helps keep your code neat and tidy by packaging each control's HTML and JavaScript up into a single file.
 
