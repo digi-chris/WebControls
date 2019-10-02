@@ -1,0 +1,71 @@
+<div class="app-control">
+    <div data-control="VideoPlayer">
+        <div data-name="modalBg" class="modal-background-div fade" style="display: none;"></div>
+        <div data-name="modalVideo" class="modal-video fade" style="display: none;">
+            <div class="video-title"><div style="float: right;"><button data-name="btnClose"><i class="fas fa-times-circle"></i></button></div></div>
+            <video class="video-player" controls data-name="videoElement"></video>
+            <div class="video-footer"></div>
+        </div>
+    </div>
+    <script>
+        class VideoPlayer extends Control {
+            constructor(title, videoUrl) {
+                super();
+
+                var videoElement = this.getElement("videoElement");
+                videoElement.src = videoUrl;
+
+                this.getElement("btnClose").addEventListener("click", () => {
+                    this.hide();
+                });
+            }
+
+            show() {
+                document.body.appendChild(this.element);
+                this.getElement("modalBg").style.display = "";
+                this.getElement("modalVideo").style.display = "";
+                setTimeout(() => {
+                    this.getElement("modalBg").classList.add("show");
+                    this.getElement("modalVideo").classList.add("show");
+                    //tobj.getElement("modalWindow").classList.add("in");
+                    //tobj.getElement("modalWindow").classList.add("show");
+                }, 50);
+            }
+
+            play() {
+                this.getElement("videoElement").play();
+            }
+
+            hide() {
+                var tobj = this;
+                var videoElement = this.getElement("videoElement");
+                videoElement.pause();
+
+                return new Promise((resolve, reject) => {
+                    tobj.getElement("modalBg").classList.remove("show");
+                    tobj.getElement("modalVideo").classList.remove("show");
+                    //tobj.getElement("modalWindow").classList.remove("in");
+                    //tobj.getElement("modalWindow").classList.remove("show");
+                    setTimeout(() => {
+                        document.body.removeChild(this.element);
+                        resolve();
+                    }, 650);
+
+                    if (tobj.onclose) {
+                        var e = { target: tobj };
+                        tobj.onclose(tobj);
+                    }
+                });
+            }
+
+            addEventListener(eventType, listener, options) {
+                if (eventType === "close") {
+                    this.onclose = listener;
+                } else {
+                    var videoElement = this.getElement("videoElement");
+                    videoElement.addEventListener(eventType, listener, options);
+                }
+            }
+        }
+    </script>
+</div>

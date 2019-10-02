@@ -1,3 +1,5 @@
+var __loadedControls = [];
+
 class Control {
     constructor(node) {
         if (node) {
@@ -28,7 +30,8 @@ class Control {
     getElement(dataName) {
         var elements = this.element.querySelectorAll("[data-name='" + dataName + "']");
         if (elements.length === 0) {
-            throw "Element '" + dataName + "' does not exist.";
+            //throw "Element '" + dataName + "' does not exist.";
+            return null;
         } else if (elements.length === 1) {
             return elements[0];
         } else {
@@ -100,30 +103,112 @@ var includesDiv = document.createElement("div");
 includesDiv.style.display = "none";
 document.body.appendChild(includesDiv);
 
-function LoadControl(controlName) {
+var __controlsScriptTag = document.currentScript;
+var __controlsRootURL = __controlsScriptTag.getAttribute("src");
+__controlsRootURL = __controlsRootURL.substring(0, __controlsRootURL.lastIndexOf("/") + 1);
+
+function ParseComments(node, removeAfter) {
+    return new Promise((resolve, reject) => {
+        var children = node.childNodes;
+        var comments = [];
+        var imports = [];
+        var i;
+
+        for (i = 0; i < children.length; i++) {
+            if (children[i].nodeType === 8) {
+                comments.push(children[i]);
+            }
+        }
+
+        for (i = 0; i < comments.length; i++) {
+            var lines = comments[i].nodeValue.replace('\r', '').split('\n');
+            for (var l = 0; l < lines.length; l++) {
+                var importIndex = lines[l].indexOf('#import ');
+                if (importIndex > -1) {
+                    var importLine = lines[l].substring(importIndex + 8);
+                    var importItems = importLine.split(' ');
+                    for (var ii = 0; ii < importItems.length; ii++) {
+                        if (importItems[ii].length > 0) {
+                            imports.push(importItems[ii]);
+                        }
+                    }
+                }
+            }
+            //commentContents.push(children[i].nodeValue);
+            if (removeAfter) {
+                node.removeChild(children[i]);
+            }
+        }
+
+        console.log('imports:', imports);
+        var nextImport = (importIndex) => {
+            if (importIndex < imports.length) {
+                LoadControl(imports[importIndex], () => {
+                    nextImport(importIndex + 1);
+                });
+            } else {
+                console.log("import loading complete!");
+                resolve();
+            }
+        };
+
+        nextImport(0);
+    });
+}
+
+function LoadControl(controlName, callback) {
+    controlName = controlName.replace(/\./g, '/');
+    console.log('controlName:', controlName);
+    if (__loadedControls.includes(controlName)) {
+        if (callback) {
+            callback();
+            return;
+        }
+    }
+
+    __loadedControls.push(controlName);
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-            //console.log(xhr.responseText);
-            var tempDiv = document.createElement("div");
-            tempDiv.innerHTML = xhr.responseText;
-            var controlHtml = tempDiv.querySelectorAll("[data-control]")[0];
-            //console.log("controlHTML: ", controlHtml);
-            var controlScript = tempDiv.getElementsByTagName("script")[0];
-            //console.log("controlScript: ", controlScript);
-            var controlDiv = document.createElement("div");
-            controlDiv.className = tempDiv.className;
-            controlDiv.appendChild(controlHtml);
-            var s = document.createElement("script");
-            s.textContent = controlScript.textContent;
-            controlDiv.appendChild(s);
-            includesDiv.appendChild(controlDiv);
+            if (xhr.status === 200) {
+                //console.log(xhr.responseText);
+                var tempDiv = document.createElement("div");
+                tempDiv.innerHTML = xhr.responseText;
+                var controlHtml = tempDiv.querySelectorAll("[data-control]")[0];
+                //console.log("controlHTML: ", controlHtml);
+                var controlScript = tempDiv.getElementsByTagName("script")[0];
+                //console.log("controlScript: ", controlScript);
+                var controlDiv = document.createElement("div");
+                controlDiv.className = tempDiv.className;
+                controlDiv.appendChild(controlHtml);
+                var s = document.createElement("script");
+                s.textContent = controlScript.textContent;
+                controlDiv.appendChild(s);
+                includesDiv.appendChild(controlDiv);
+
+                ParseComments(tempDiv, true)
+                    .then(() => {
+                        if (callback) {
+                            callback();
+                        }
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        if (callback) {
+                            callback();
+                        }
+                    });
+            } else {
+                if (callback) {
+                    callback();
+                }
+            }
         }
     };
 
     console.log("Loading controls/" + controlName + ".html");
-    xhr.open("GET", "controls/" + controlName + ".html");
+    xhr.open("GET", __controlsRootURL + "../controls/" + controlName + ".html");
     xhr.send();
 }
 
@@ -144,3 +229,5 @@ function AddPage(page) {
         }
     }
 }
+
+ParseComments(document.body, false);

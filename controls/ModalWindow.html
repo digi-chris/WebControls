@@ -25,11 +25,13 @@
             constructor(title, bodyControl, onOk, onCancel) {
                 super();
                 this.getElement("txtTitle").innerText = title;
+
                 this.getElement("btnClose").addEventListener("click", () => {
                     this.hide().then(() => {
                         this.dispose();
                     });
                 });
+
                 this.getElement("btnCancel").addEventListener("click", () => {
                     if (onCancel) {
                         onCancel();
@@ -38,11 +40,13 @@
                         this.dispose();
                     });
                 });
+
                 if (bodyControl) {
                     bodyControl.parent = this;
                     this._controls.push(bodyControl);
                     this.getElement('modalBody').appendChild(bodyControl.element);
                 }
+
                 this.getElement("btnOk").addEventListener("click", () => {
                     if (onOk) {
                         onOk();
@@ -52,6 +56,7 @@
                     });
                 });
             }
+
             show() {
                 document.body.appendChild(this.element);
                 var tobj = this;
@@ -62,6 +67,7 @@
                     tobj.getElement("modalWindow").classList.add("show");
                 }, 50);
             }
+
             hide() {
                 var tobj = this;
                 return new Promise((resolve, reject) => {
