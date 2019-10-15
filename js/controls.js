@@ -156,6 +156,19 @@ function ParseComments(node, removeAfter) {
     });
 }
 
+function LoadControls(controlNameArray) {
+    return new Promise((resolve, reject) => {
+        var getNextControl = (index) => {
+            if (index < controlNameArray.length) {
+                LoadControl(controlNameArray[index], () => { getNextControl(index + 1); });
+            } else {
+                resolve();
+            }
+        };
+        getNextControl(0);
+    });
+}
+
 function LoadControl(controlName, callback) {
     controlName = controlName.replace(/\./g, '/');
     console.log('controlName:', controlName);
