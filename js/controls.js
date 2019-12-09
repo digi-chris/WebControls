@@ -243,4 +243,47 @@ function AddPage(page) {
     }
 }
 
-ParseComments(document.body, false);
+function instantiate(name, ...a) {
+    var c = eval(name);
+    return new c(...a);
+}
+
+function LoadIncludes() {
+    var includes = document.querySelectorAll("div[data-include]");
+    console.log('includes:', includes);
+    for (var i = 0; i < includes.length; i++) {
+        var control = instantiate(includes[i].getAttribute("data-include"), []);
+        includes[i].parentNode.replaceChild(control.element, includes[i]);
+    }
+}
+
+var x = document.evaluate('//comment()', document, null, XPathResult.ANY_TYPE, null),
+    comment = x.iterateNext();
+
+var __importTotal = 0;
+var __importCount = 0;
+
+while (comment) {
+    //alert(comment.textContent);
+    var lines = comment.textContent.replace('\r', '').split('\n');
+    for (var l = 0; l < lines.length; l++) {
+        var importIndex = lines[l].indexOf('#import ');
+        if (importIndex > -1) {
+            var importLine = lines[l].substring(importIndex + 8);
+            var importItems = importLine.split(' ');
+            for (var ii = 0; ii < importItems.length; ii++) {
+                if (importItems[ii].length > 0) {
+                    __importTotal++;
+                    LoadControl(importItems[ii], () => {
+                        __importCount++;
+                        if (__importTotal === __importCount) {
+                            console.log("Imports loaded!");
+                            setTimeout(LoadIncludes, 1);
+                        }
+                    });
+                }
+            }
+        }
+    }
+    comment = x.iterateNext();
+}
