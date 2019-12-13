@@ -254,10 +254,19 @@ class Page extends Control {
         var includes = document.querySelectorAll("div[data-include]");
         console.log('includes:', includes);
         for (var i = 0; i < includes.length; i++) {
-            var args = JSON.parse(includes[i].innerText);
+            var args = null;
+            if (includes[i].innerText) {
+                try {
+                    args = JSON.parse(includes[i].innerText);
+                }
+                catch (error) {
+                    console.error("Couldn't parse include JSON:", includes[i].innerText);
+                }
+            }
             var control = instantiate(includes[i].getAttribute("data-include"), args);
             __controls[includes[i].id] = control;
             includes[i].parentNode.replaceChild(control.element, includes[i]);
+            
         }
     }
 
