@@ -246,9 +246,12 @@ var WebControls;
         }
     }
 
-    function instantiate(name, ...a) {
+    function instantiate(name, a) {
         var c = eval(name);
-        return new c(...a);
+        if (a) {
+            return Reflect.construct(c, a);
+        }
+        return new c();
     }
 
     var __controls = {};
