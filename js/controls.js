@@ -248,13 +248,21 @@ function instantiate(name, ...a) {
     return new c(...a);
 }
 
+var __controls = {};
+
 function LoadIncludes() {
     var includes = document.querySelectorAll("div[data-include]");
     console.log('includes:', includes);
     for (var i = 0; i < includes.length; i++) {
-        var control = instantiate(includes[i].getAttribute("data-include"), []);
+        var args = JSON.parse(includes[i].innerText);
+        var control = instantiate(includes[i].getAttribute("data-include"), args);
+        __controls[includes[i].id] = control;
         includes[i].parentNode.replaceChild(control.element, includes[i]);
     }
+}
+
+function getControlById(id) {
+    return __controls[id];
 }
 
 var x = document.evaluate('//comment()', document, null, XPathResult.ANY_TYPE, null),
