@@ -97,8 +97,11 @@ class Page extends Control {
     }
 }
 
+var WebControls;
+
 (function () {
     console.log('Loading WebControls...');
+    WebControls = this;
     var loadedControls = [];
     var includesDiv = document.createElement("div");
     includesDiv.style.display = "none";
@@ -266,13 +269,14 @@ class Page extends Control {
             var control = instantiate(includes[i].getAttribute("data-include"), args);
             __controls[includes[i].id] = control;
             includes[i].parentNode.replaceChild(control.element, includes[i]);
-            
         }
     }
 
     function getControlById(id) {
         return __controls[id];
     }
+
+    this.GetControlById = getControlById;
 
     var x = document.evaluate('//comment()', document, null, XPathResult.ANY_TYPE, null),
         comment = x.iterateNext();
@@ -295,7 +299,13 @@ class Page extends Control {
                             __importCount++;
                             if (__importTotal === __importCount) {
                                 console.log("Imports loaded!");
-                                setTimeout(LoadIncludes, 1);
+                                setTimeout(
+                                    () => {
+                                        LoadIncludes();
+                                        if (WebControls_Loaded) {
+                                            WebControls_Loaded();
+                                        }
+                                    }, 1);
                             }
                         });
                     }
