@@ -115,6 +115,7 @@
 
                 var days = [];
                 this.days = days;
+                this.calendar = {};
 
                 function getDayOfYear(date) {
                     var start = new Date(date.getFullYear(), 0, 0);
@@ -136,7 +137,7 @@
             DrawGrid() {
                 var dayOffset = new Date(this.CurrentYear + '-' + this.CurrentMonth + '-01').getDay();
                 var daysInMonth = new Date(this.CurrentYear, this.CurrentMonth, 0).getDate();
-                var date = new Date(this.CurrentYear, this.CurrentMonth, 1); 
+                var date = new Date(this.CurrentYear, this.CurrentMonth - 1, 1); 
                 var monthName = date.toLocaleString('default', { month: 'long' });
 
                 this.getElement("txtMonthName").innerText = monthName;
@@ -158,9 +159,19 @@
                         dayElement.setAttribute('data-level', '0');
                         this.days.push(dayElement);
 
-                        if (i === this.GetDayOfYear(new Date()) - 1) {
-                            dayElement.classList.add("calendar-today-item");
+                        //if (i === this.GetDayOfYear(new Date()) - 1) {
+                        //    dayElement.classList.add("calendar-today-item");
+                        //}
+
+                        var thisDate = new Date(this.CurrentYear + "-" + this.CurrentMonth + "-" + (i + 1));
+                        var dayOfYear = this.GetDayOfYear(thisDate);
+
+                        if (this.calendar[this.CurrentYear]) {
+                            if (this.calendar[this.CurrentYear][dayOfYear]) {
+                                dayElement.style.backgroundColor = "red";
+                            }
                         }
+
                         squares.insertAdjacentElement('beforeend', dayElement);
                     }
                 }
@@ -203,16 +214,32 @@
                 return Math.floor(diff / oneDay);
             }
 
-            Add(date, shade, lightest, darkest) {
-                var day = this.getDayOfYear(date);
-                this.AddDay(day, shade, lightest, darkest);
-            }
+            //Add(date, shade, lightest, darkest) {
+            //    var day = this.getDayOfYear(date);
+            //    this.AddDay(day, shade, lightest, darkest);
+            //}
 
-            AddDay(day, shade, lightest, darkest) {
-                var cR = (lightest[0] - darkest[0]) * (1 - shade) + darkest[0];
-                var cG = (lightest[1] - darkest[1]) * (1 - shade) + darkest[1];
-                var cB = (lightest[2] - darkest[2]) * (1 - shade) + darkest[2];
-                this.days[day - 1].style.backgroundColor = 'rgba(' + cR + ', ' + cG + ', ' + cB + ', 1)';
+            //AddDay(day, shade, lightest, darkest) {
+            //    var cR = (lightest[0] - darkest[0]) * (1 - shade) + darkest[0];
+            //    var cG = (lightest[1] - darkest[1]) * (1 - shade) + darkest[1];
+            //    var cB = (lightest[2] - darkest[2]) * (1 - shade) + darkest[2];
+            //    this.days[day - 1].style.backgroundColor = 'rgba(' + cR + ', ' + cG + ', ' + cB + ', 1)';
+            //}
+
+            AddDate(date) {
+                if (!this.calendar[date.getFullYear()]) {
+                    this.calendar[date.getFullYear()] = {};
+                }
+                var yearArray = this.calendar[date.getFullYear()];
+                var dayOfYear = this.getDayOfYear(date);
+                if (!yearArray[dayOfYear]) {
+                    yearArray[dayOfYear] = [];
+                }
+
+                yearArray[dayOfYear].push(date);
+
+                this.ClearGrid();
+                this.DrawGrid();
             }
         }
     </script>
