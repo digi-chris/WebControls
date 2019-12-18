@@ -29,7 +29,12 @@ class Control {
         for (var obj in data) {
             var ele = this.getElement(obj);
             if (ele) {
-                ele.innerText = data[obj];
+                var dataTransform = ele.getAttribute("data-transform");
+                if (this[dataTransform]) {
+                    ele.innerHTML = this[dataTransform](data[obj]);
+                } else {
+                    ele.innerText = data[obj];
+                }
             }
         }
     }
