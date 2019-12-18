@@ -25,6 +25,15 @@ class Control {
         }
     }
 
+    bind(data) {
+        for (var obj in data) {
+            var ele = this.getElement(obj);
+            if (ele) {
+                ele.innerText = data[obj];
+            }
+        }
+    }
+
     getElement(dataName) {
         var elements = this.element.querySelectorAll("[data-name='" + dataName + "']");
         if (elements.length === 0) {
@@ -227,6 +236,12 @@ var WebControls;
         xhr.open("GET", controlsRootURL + "../controls/" + controlName + ".html");
         xhr.send();
     }
+
+    this.Import = (controlName) => {
+        return new Promise((resolve, reject) => {
+            LoadControl(controlName, resolve);
+        });
+    };
 
     function AddPage(page) {
         document.body.appendChild(page.element);
