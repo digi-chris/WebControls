@@ -24,6 +24,21 @@
                 btnOpenModal.addEventListener("click", () => {
                     alertModal.show();
                 });
+
+                var cMenu = new ContextMenu(btnOpenModal, [
+                    {
+                        text: "Item 1",
+                        click: () => {
+                            console.log('item 1 clicked');
+                        }
+                    },
+                    {
+                        text: "Item 2",
+                        checkEnabled: () => {
+                            return true;
+                        }
+                    }
+                ]);
             }
         </script>
     </body>
