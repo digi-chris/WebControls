@@ -1,0 +1,189 @@
+<div class="app-control">
+    <style>
+        .context-menu-bg {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .context-menu {
+            position: absolute;
+            border: 1px solid darkblue;
+            background-color: white;
+        }
+
+        .context-menu-item {
+            white-space: nowrap;
+            padding: 4px;
+            font-size: 12px;
+            padding-right: 12px;
+            cursor: default;
+            user-select: none;
+        }
+
+            .context-menu-item:hover {
+                background-color: darkblue;
+                color: white;
+            }
+
+        .context-menu-item-disabled {
+            color: lightgrey;
+            pointer-events: none;
+        }
+
+            .context-menu-item-disabled:hover {
+                background-color: unset;
+                color: unset;
+            }
+
+
+        .context-menu-item::before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            content: "\f00c";
+            padding-right: 4px;
+            visibility: hidden;
+        }
+
+        .context-menu-item-checked::before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            content: "\f00c";
+            padding-right: 4px;
+            visibility: visible;
+        }
+
+        .context-menu-spacer {
+            border-top: 1px solid lightgrey;
+            margin-top: 4px;
+            padding-bottom: 4px;
+        }
+    </style>
+    <div class="context-menu" data-control="ContextMenu">
+    </div>
+    <script>
+        class ContextMenu extends Control {
+            constructor(targetElement, items) {
+                super();
+                var bg = document.createElement('div');
+                bg.className = 'context-menu-bg';
+                document.body.appendChild(bg);
+
+                var menuDiv = document.createElement('div');
+                menuDiv.className = 'context-menu';
+                bg.appendChild(menuDiv);
+
+                bg.style.display = 'none';
+
+                targetElement.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    bg.style.display = '';
+                    //console.log(e);
+                    //console.log(menuDiv.clientHeight);
+                    menuDiv.style.left = e.clientX + 'px';
+                    menuDiv.style.top = e.clientY + 'px';
+
+                    if (e.clientY + menuDiv.clientHeight > window.innerHeight) {
+                        menuDiv.style.top = (window.innerHeight - menuDiv.clientHeight - 2) + 'px';
+                    }
+
+                    if (e.clientX + menuDiv.clientWidth > window.innerWidth) {
+                        menuDiv.style.left = (window.innerWidth - menuDiv.clientWidth - 2) + 'px';
+                    }
+
+                    items.forEach((item) => {
+                        if (item.checkEnabled) {
+                            if (item.checkEnabled((isEnabled) => {
+                                // callback here allows setting of disabled/enabled property asynchronously
+                                if (isEnabled) {
+                                    item.element.classList.remove('context-menu-item-disabled');
+                                } else {
+                                    item.element.classList.add('context-menu-item-disabled');
+                                }
+                            })) {
+                                item.element.classList.remove('context-menu-item-disabled');
+                            } else {
+                                item.element.classList.add('context-menu-item-disabled');
+                            }
+                        }
+                        if (item.checkVisible) {
+                            var visResult = item.checkVisible();
+                            if (visResult && visResult.then) {
+                                // this is a promise - hide until the promise completes.
+                                item.element.style.display = 'none';
+                                visResult
+                                    .then(() => {
+                                        item.element.style.display = '';
+                                    })
+                                    .catch(() => {
+                                        item.element.style.display = 'none';
+                                    });
+                            } else {
+                                if (!visResult) {
+                                    item.element.style.display = 'none';
+                                } else {
+                                    item.element.style.display = '';
+                                }
+                            }
+                        }
+                        if (item.isChecked) {
+                            if (typeof item.isChecked === 'function') {
+                                if (item.isChecked()) {
+                                    item.element.classList.add('context-menu-item-checked');
+                                } else {
+                                    item.element.classList.remove('context-menu-item-checked');
+                                }
+                            }
+                        }
+                    });
+                });
+
+                bg.addEventListener('click', () => {
+                    hideContextMenu();
+                });
+
+                bg.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    //e.stopPropagation();
+                    hideContextMenu();
+                });
+
+                function hideContextMenu() {
+                    bg.style.display = 'none';
+                }
+
+                items.forEach((item) => {
+                    if (item !== null) {
+                        var cItem = document.createElement('div');
+                        item.element = cItem;
+                        if (item.spacer) {
+                            cItem.className = 'context-menu-spacer';
+                        } else {
+                            cItem.className = 'context-menu-item';
+                            if (typeof item.text === "function") {
+                                cItem.innerText = item.text();
+                            } else {
+                                cItem.innerText = item.text;
+                            }
+                        }
+                        cItem.addEventListener('click', () => {
+                            hideContextMenu();
+                            if (item.click) {
+                                item.click();
+                            }
+                        });
+                        menuDiv.appendChild(cItem);
+                    }
+                });
+
+                this.destroy = () => {
+                    document.body.removeChild(bg);
+                };
+            }
+        }
+    </script>
+</div>
