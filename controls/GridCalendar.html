@@ -120,6 +120,7 @@
                 super();
                 var dayOffset = new Date(new Date().getFullYear() + '-01-01').getDay();
                 var days = [];
+                var i;
                 this.days = days;
                 const squares = this.getElement("day-grid");
                 if (squares) {

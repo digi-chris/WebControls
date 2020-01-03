@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <title>Basic WebControls Example</title>
+        <script type="text/javascript" src="js/controls.js" defer></script>
+    </head>
+    <body>
+        <!-- Comments can be used to import Controls -->
+        <!--
+            #import ModalWindow
+            #import GridCalendar
+            #import ContextMenu
+        -->
+        <!-- Controls can be loaded in DOM elements -->
+        <div data-include="GridCalendar"></div>
+        <button id="btnOpenModal">Open Modal Window!</button>
+
+        <script>
+            // WebControls_Loaded fires when WebControls is ready to be used
+            function WebControls_Loaded() {
+                // we can also create controls in script
+                var alertModal = new ModalWindow("Alert");
+
+                var btnOpenModal = document.getElementById("btnOpenModal");
+                btnOpenModal.addEventListener("click", () => {
+                    alertModal.show();
+                });
+            }
+        </script>
+    </body>
+</html>
