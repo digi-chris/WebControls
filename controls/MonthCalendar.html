@@ -1,97 +1,97 @@
 <div class="app-control">
+    <style>
+        :root {
+            --square-size: 10px;
+            --square-gap: 3px;
+            --week-width: calc(var(--square-size) + var(--square-gap));
+        }
+
+        .calendar-months {
+            grid-area: months;
+        }
+
+        .calendar-days {
+            grid-area: days;
+        }
+
+        .calendar-squares {
+            grid-area: squares;
+        }
+
+        .calendar-graph {
+            display: inline-grid;
+            grid-template-areas: "empty months" "days squares";
+            grid-template-columns: auto 1fr;
+            grid-gap: 10px;
+        }
+
+        .calendar-months {
+            display: grid;
+            grid-template-columns: calc(var(--week-width) * 4) /* Jan */
+            calc(var(--week-width) * 4) /* Feb */
+            calc(var(--week-width) * 4) /* Mar */
+            calc(var(--week-width) * 5) /* Apr */
+            calc(var(--week-width) * 4) /* May */
+            calc(var(--week-width) * 4) /* Jun */
+            calc(var(--week-width) * 5) /* Jul */
+            calc(var(--week-width) * 4) /* Aug */
+            calc(var(--week-width) * 4) /* Sep */
+            calc(var(--week-width) * 5) /* Oct */
+            calc(var(--week-width) * 4) /* Nov */
+            calc(var(--week-width) * 5) /* Dec */;
+        }
+
+        .carlendar-days,
+        .calendar-squares {
+            display: grid;
+            grid-gap: var(--square-gap);
+            grid-template-rows: repeat(7, var(--square-size));
+        }
+
+        .calendar-squares {
+            grid-auto-flow: column;
+            grid-auto-columns: var(--square-size);
+        }
+
+
+        /* Other styling */
+
+        .calendar-graph {
+            padding: 10px 15px 10px 15px;
+            border: 1px #e1e4e8 solid;
+            border-radius: 5px;
+            margin: 6px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            font-size: 9px;
+            margin-left: 70px;
+            margin-top: 14px;
+        }
+
+            .calendar-graph > ul {
+                list-style-type: none;
+                padding-left: 0px;
+                margin-bottom: 2px;
+            }
+
+        .calendar-days li:nth-child(odd) {
+            visibility: hidden;
+        }
+
+        .calendar-squares li {
+            background-color: #ebedf0;
+        }
+
+        .calendar-today-item {
+            box-shadow: rgba(0, 0, 0, 1) 0px 0px 0px 1px;
+            border-radius: 1px;
+        }
+
+        .calendar-header {
+            grid-column: 1/-1;
+            text-align: center;
+        }
+    </style>
     <div data-control="MonthCalendar">
-        <style>
-            :root {
-                --square-size: 10px;
-                --square-gap: 3px;
-                --week-width: calc(var(--square-size) + var(--square-gap));
-            }
-
-            .calendar-months {
-                grid-area: months;
-            }
-
-            .calendar-days {
-                grid-area: days;
-            }
-
-            .calendar-squares {
-                grid-area: squares;
-            }
-
-            .calendar-graph {
-                display: inline-grid;
-                grid-template-areas: "empty months" "days squares";
-                grid-template-columns: auto 1fr;
-                grid-gap: 10px;
-            }
-
-            .calendar-months {
-                display: grid;
-                grid-template-columns: calc(var(--week-width) * 4) /* Jan */
-                calc(var(--week-width) * 4) /* Feb */
-                calc(var(--week-width) * 4) /* Mar */
-                calc(var(--week-width) * 5) /* Apr */
-                calc(var(--week-width) * 4) /* May */
-                calc(var(--week-width) * 4) /* Jun */
-                calc(var(--week-width) * 5) /* Jul */
-                calc(var(--week-width) * 4) /* Aug */
-                calc(var(--week-width) * 4) /* Sep */
-                calc(var(--week-width) * 5) /* Oct */
-                calc(var(--week-width) * 4) /* Nov */
-                calc(var(--week-width) * 5) /* Dec */;
-            }
-
-            .carlendar-days,
-            .calendar-squares {
-                display: grid;
-                grid-gap: var(--square-gap);
-                grid-template-rows: repeat(7, var(--square-size));
-            }
-
-            .calendar-squares {
-                grid-auto-flow: column;
-                grid-auto-columns: var(--square-size);
-            }
-
-
-            /* Other styling */
-
-            .calendar-graph {
-                padding: 10px 15px 10px 15px;
-                border: 1px #e1e4e8 solid;
-                border-radius: 5px;
-                margin: 6px;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-                font-size: 9px;
-                margin-left: 70px;
-                margin-top: 14px;
-            }
-
-                .calendar-graph > ul {
-                    list-style-type: none;
-                    padding-left: 0px;
-                    margin-bottom: 2px;
-                }
-
-            .calendar-days li:nth-child(odd) {
-                visibility: hidden;
-            }
-
-            .calendar-squares li {
-                background-color: #ebedf0;
-            }
-
-            .calendar-today-item {
-                box-shadow: rgba(0, 0, 0, 1) 0px 0px 0px 1px;
-                border-radius: 1px;
-            }
-
-            .calendar-header {
-                grid-column: 1/-1;
-                text-align: center;
-            }
-        </style>
         <div class="calendar-graph">
             <div class="calendar-header"><button data-name="btnPrevMonth">&lt;</button>&nbsp;<span data-name="txtMonthName">Month</span>&nbsp;<span data-name="txtYear">Month</span>&nbsp;<button data-name="btnNextMonth">&gt;</button></div>
             <ul class="calendar-days">
