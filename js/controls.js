@@ -205,6 +205,16 @@ var WebControls;
                     //console.log(xhr.responseText);
                     var tempDiv = document.createElement("div");
                     tempDiv.innerHTML = xhr.responseText;
+
+                    var styleElements = tempDiv.getElementsByTagName("style");
+                    if (styleElements.length > 0) {
+                        var controlCSS = styleElements[0];
+                        var css = document.createElement("style");
+                        css.type = 'text/css';
+                        css.innerHTML = controlCSS.innerHTML;
+                        document.getElementsByTagName('head')[0].appendChild(css);
+                    }
+                    
                     var controlHtml = tempDiv.querySelectorAll("[data-control]")[0];
                     //console.log("controlHTML: ", controlHtml);
                     var controlScript = tempDiv.getElementsByTagName("script")[0];
