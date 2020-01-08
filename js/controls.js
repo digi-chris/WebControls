@@ -1,5 +1,6 @@
 class Control {
     constructor(node) {
+        this._events = {};
         if (node) {
             if (node instanceof Element) {
                 this.element = node;
@@ -76,6 +77,24 @@ class Control {
                 return;
             }
         }
+    }
+
+    addEventListener(eventName, callback) {
+        if (!Array.isArray(this._events[eventName])) {
+            this._events[eventName] = [];
+        }
+        this._events[eventName].push(callback);
+    }
+
+    triggerEvent(eventName, ...args) {
+        var triggered = false;
+        if (Array.isArray(this._events[eventName])) {
+            this._events[eventName].forEach((item) => {
+                item(...args);
+                triggered = true;
+            });
+        }
+        return triggered;
     }
 
     dispose() {
@@ -188,7 +207,7 @@ var WebControls;
 
     function LoadControl(controlName, callback) {
         controlName = controlName.replace(/\./g, '/');
-        console.log('controlName:', controlName);
+        //console.log('controlName:', controlName);
         if (loadedControls.includes(controlName)) {
             if (callback) {
                 callback();
@@ -214,7 +233,7 @@ var WebControls;
                         css.innerHTML = controlCSS.innerHTML;
                         document.getElementsByTagName('head')[0].appendChild(css);
                     }
-                    
+
                     var controlHtml = tempDiv.querySelectorAll("[data-control]")[0];
                     //console.log("controlHTML: ", controlHtml);
                     var controlScript = tempDiv.getElementsByTagName("script")[0];
