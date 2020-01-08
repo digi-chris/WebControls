@@ -85,6 +85,34 @@
             box-shadow: rgba(0, 0, 0, 1) 0px 0px 0px 1px;
             border-radius: 1px;
         }
+
+        .calendar-date-marker {
+            position: absolute;
+            z-index: 1000;
+            padding: 4px;
+            pointer-events: none;
+            transform: translate(-50%, calc(-100% - 8px));
+            font-size: 12px;
+            color: white;
+            background-color: darkslategrey;
+            border-radius: 3px;
+        }
+
+            .calendar-date-marker:after {
+                content: '';
+                position: absolute;
+                top: 100%;
+                left: calc(50% - 5px);
+                width: 0;
+                height: 0;
+                border-top: solid 5px darkslategrey;
+                border-left: solid 5px transparent;
+                border-right: solid 5px transparent;
+            }
+
+        .calendar-date-marker-title {
+            font-weight: bold;
+        }
     </style>
     <div data-control="GridCalendar">
         <div class="calendar-graph">
@@ -113,15 +141,29 @@
             </ul>
             <ul class="calendar-squares" data-name="day-grid"></ul>
         </div>
+        <div data-name="dateMarker" class="calendar-date-marker" style="display: none;">
+            <div data-name="dateMarkerTitle" class="calendar-date-marker-title"></div>
+            <div data-name="dateMarkerContent" class="calendar-date-marker-content"></div>
+        </div>
     </div>
     <script>
         class GridCalendar extends Control {
             constructor() {
                 super();
-                var dayOffset = new Date(new Date().getFullYear() + '-01-01').getDay();
+                var tobj = this;
+                var year = new Date().getFullYear();
+                var dayOffset = new Date(year + '-01-01').getDay();
                 var days = [];
-                var i;
                 this.days = days;
+
+                var dateMarker = this.getElement("dateMarker");
+                var dateMarkerTitle = this.getElement("dateMarkerTitle");
+                var dateMarkerContent = this.getElement("dateMarkerContent");
+
+                this.element.addEventListener("mouseleave", () => {
+                    dateMarker.style.display = "none";
+                });
+
                 const squares = this.getElement("day-grid");
                 if (squares) {
                     var dayElement;
@@ -133,11 +175,41 @@
 
                     var daysInYear = new Date().getFullYear() % 4 === 0 ? 366 : 365;
 
+                    var currentDay = -1;
+                    dateMarker.parentNode.removeChild(dateMarker);
+                    document.body.appendChild(dateMarker);
+
+                    var setMouseEvents = (day, element) => {
+                        element.addEventListener('mousemove', () => {
+                            if (currentDay !== day) {
+                                currentDay = day;
+                                var date = new Date(year, 0);
+                                date = new Date(date.setDate(day + 1));
+
+                                dateMarkerTitle.innerText = date.toDateString();
+                                dateMarkerContent.innerHTML = "";
+                                dateMarker.style.display = "";
+
+                                var rect = element.getBoundingClientRect();
+                                dateMarker.style.left = (rect.left + (rect.right - rect.left) / 2) + "px";
+                                dateMarker.style.top = (rect.top + window.scrollY) + "px";
+
+                                var content = document.createElement("span");
+                                dateMarkerContent.appendChild(content);
+                                tobj.triggerEvent("datepreview", date, content);
+                            }
+                        });
+
+                        element.addEventListener('mouseleave', () => {
+                            dateMarker.style.display = "none";
+                        });
+                    };
+
                     for (i = 0; i < daysInYear; i++) {
                         dayElement = document.createElement('li');
                         dayElement.setAttribute('data-level', '0');
                         days.push(dayElement);
-
+                        setMouseEvents(i, dayElement);
                         if (i === getDayOfYear(new Date()) - 1) {
                             dayElement.classList.add("calendar-today-item");
                         }
