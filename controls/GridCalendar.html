@@ -160,10 +160,6 @@
                 var dateMarkerTitle = this.getElement("dateMarkerTitle");
                 var dateMarkerContent = this.getElement("dateMarkerContent");
 
-                this.element.addEventListener("mouseleave", () => {
-                    dateMarker.style.display = "none";
-                });
-
                 const squares = this.getElement("day-grid");
                 if (squares) {
                     var dayElement;
@@ -201,6 +197,7 @@
                         });
 
                         element.addEventListener('mouseleave', () => {
+                            currentDay = -1;
                             dateMarker.style.display = "none";
                         });
                     };
