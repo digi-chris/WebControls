@@ -354,7 +354,7 @@ var WebControls;
                                 setTimeout(
                                     () => {
                                         LoadIncludes();
-                                        if (WebControls_Loaded) {
+                                        if (typeof WebControls_Loaded !== "undefined") {
                                             WebControls_Loaded();
                                         }
                                     }, 1);
