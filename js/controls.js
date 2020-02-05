@@ -320,6 +320,9 @@ var WebControls;
             }
             var control = instantiate(includes[i].getAttribute("data-include"), args);
             __controls[includes[i].id] = control;
+            for (var ii = 0; ii < includes[i].classList.length; ii++) {
+                control.element.classList.add(includes[i].classList[ii]);
+            }
             includes[i].parentNode.replaceChild(control.element, includes[i]);
         }
     }
