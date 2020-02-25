@@ -14,6 +14,8 @@ class Control {
             var bElement = document.querySelectorAll("[data-control='" + this.constructor.name + "']")[0];
             if (bElement) {
                 this.element = bElement.cloneNode(true);
+                this.element.setAttribute("data-control-from", this.constructor.name);
+                this.element.removeAttribute("data-control");
             }
         }
 
@@ -138,7 +140,7 @@ var WebControls;
     var loadedControls = [];
     var includesDiv = document.createElement("div");
     includesDiv.style.display = "none";
-    document.body.appendChild(includesDiv);
+    document.body.insertBefore(includesDiv, document.body.firstChild);
 
     var controlsScriptTag = document.currentScript;
     var controlsRootURL = controlsScriptTag.getAttribute("src");
