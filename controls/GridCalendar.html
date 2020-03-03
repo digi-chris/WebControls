@@ -200,6 +200,12 @@
                             currentDay = -1;
                             dateMarker.style.display = "none";
                         });
+
+                        element.addEventListener('click', () => {
+                            var date = new Date(year, 0);
+                            date = new Date(date.setDate(day + 1));
+                            tobj.triggerEvent("dateselect", date);
+                        });
                     };
 
                     for (i = 0; i < daysInYear; i++) {
@@ -241,6 +247,12 @@
                 var cG = (lightest[1] - darkest[1]) * (1 - shade) + darkest[1];
                 var cB = (lightest[2] - darkest[2]) * (1 - shade) + darkest[2];
                 this.days[day - 1].style.backgroundColor = 'rgba(' + cR + ', ' + cG + ', ' + cB + ', 1)';
+            }
+
+            ClearCalendar() {
+                for (var i = 0; i < this.days.length; i++) {
+                    this.days[i].style.backgroundColor = '';
+                }
             }
         }
     </script>
