@@ -28,6 +28,12 @@ class Control {
         }
     }
 
+    removeChildren(node) {
+        while (node.firstChild) {
+            node.removeChild(node.firstChild);
+        }
+    }
+
     bind(data) {
         for (var obj in data) {
             var ele = this.getElement(obj);
