@@ -1,0 +1,37 @@
+﻿<div class="app-control">
+    <style>
+    </style>
+    <div data-control="ListControl">
+        <input data-name="txtSearch" />
+        <div data-name="divList"></div>
+    </div>
+    <script>
+        class ListControl extends Control {
+            constructor(apiCallUrl) {
+                super();
+                var tobj = this;
+                var txtSearch = this.getElement("txtSearch");
+                var divList = this.getElement("divList");
+
+                txtSearch.addEventListener("keyup", (e) => {
+                    tobj.removeChildren(divList);
+                    apiCall(apiCallUrl + txtSearch.value, null, null)
+                        .then((r) => {
+                            console.log(r);
+                            if (Array.isArray(r)) {
+                                for (var i = 0; i < r.length; r++) {
+                                    var lItem = new ListItem(r[i], r[i].userName, this);
+                                    divList.appendChild(lItem.element);
+                                }
+                            }
+                        });
+                });
+
+                this.addEventListener("itemSelected", (item) => {
+                    console.log(item);
+                    txtSearch.value = item.Text;
+                });
+            }
+        }
+    </script>
+</div>

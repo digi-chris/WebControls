@@ -1,0 +1,36 @@
+﻿<div class="app-control">
+    <style>
+    </style>
+    <div data-control="ListItem">
+        <span data-name="txtValue"></span>
+    </div>
+    <script>
+        class ListItem extends Control {
+            constructor(object, text, parent) {
+                super();
+                this.ListObject = object;
+                var tobj = this;
+
+                var txtValue = this.getElement("txtValue")
+                if (text) {
+                    this.Text = text;
+                } else if (typeof object === "string") {
+                    this.Text = object;
+                } else {
+                    if (object.toString) {
+                        this.Text = object.toString();
+                    } else {
+                        this.Text = object;
+                    }
+                }
+                txtValue.innerText = this.Text;
+
+                this.element.addEventListener("click", (e) => {
+                    if (parent) {
+                        parent.triggerEvent("itemSelected", tobj);
+                    }
+                });
+            }
+        }
+    </script>
+</div>
