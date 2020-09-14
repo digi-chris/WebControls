@@ -1,5 +1,6 @@
 class Control {
     constructor(node) {
+        this.__controls = {};
         this._events = {};
         if (node) {
             if (node instanceof Element) {
@@ -22,9 +23,26 @@ class Control {
         this._controls = [];
         var includes = this.element.querySelectorAll("div[data-include]");
         for (var i = 0; i < includes.length; i++) {
-            var obj = eval('new ' + includes[i].getAttribute("data-include") + '()');
-            this._controls.push(obj);
-            includes[i].appendChild(obj.element);
+            var args = null;
+            if (includes[i].innerText) {
+                try {
+                    args = JSON.parse(includes[i].innerText);
+                }
+                catch (error) {
+                    console.error("Couldn't parse include JSON:", includes[i].innerText);
+                }
+            }
+            var control = WebControls.__instantiate(includes[i].getAttribute("data-include"), args);
+            this._controls.push(control);
+
+            if (includes[i].id) {
+                this.__controls[includes[i].id] = control;
+            }
+
+            for (var ii = 0; ii < includes[i].classList.length; ii++) {
+                control.element.classList.add(includes[i].classList[ii]);
+            }
+            includes[i].parentNode.replaceChild(control.element, includes[i]);
         }
     }
 
@@ -71,6 +89,14 @@ class Control {
         return null;
     }
 
+    getControlById(idName) {
+        console.log("getControlById");
+        console.log(this.__controls);
+        if (this.__controls[idName]) {
+            return this.__controls[idName];
+        }
+    }
+
     addChild(control) {
         this.element.appendChild(control.element);
         control.parent = this;
@@ -113,7 +139,9 @@ class Control {
 
         if (this.element) {
             if (this.element.parentNode) {
-                this.element.parentNode.removeChild(this.element);
+                if (this.element.parentNode.contains(this.element)) {
+                    this.element.parentNode.removeChild(this.element);
+                }
             }
         }
     }
@@ -311,35 +339,59 @@ var WebControls;
         return new c();
     }
 
+    this.__instantiate = instantiate;
+
     var __controls = {};
 
     function LoadIncludes() {
         var includes = document.querySelectorAll("div[data-include]");
         console.log('includes:', includes);
         for (var i = 0; i < includes.length; i++) {
-            var args = null;
-            if (includes[i].innerText) {
-                try {
-                    args = JSON.parse(includes[i].innerText);
+            if (!includesDiv.contains(includes[i])) {
+                var args = null;
+                if (includes[i].innerText) {
+                    try {
+                        args = JSON.parse(includes[i].innerText);
+                    }
+                    catch (error) {
+                        console.error("Couldn't parse include JSON:", includes[i].innerText);
+                    }
                 }
-                catch (error) {
-                    console.error("Couldn't parse include JSON:", includes[i].innerText);
+                var controlStyle = includes[i].getAttribute("style");
+                var control = instantiate(includes[i].getAttribute("data-include"), args);
+                __controls[includes[i].id] = control;
+                for (var ii = 0; ii < includes[i].classList.length; ii++) {
+                    control.element.classList.add(includes[i].classList[ii]);
                 }
+
+                if (controlStyle) {
+                    control.element.setAttribute("style", controlStyle);
+                }
+
+                console.log(includes[i].attributes);
+                for (var j = 0; j < includes[i].attributes.length; j++) {
+                    var attr = includes[i].attributes[j];
+                    if (attr.name.indexOf('on') === 0) {
+                        var eventName = attr.name.substring(2);
+                        control.addEventListener(eventName, window[attr.value]);
+                    }
+                };
+
+                includes[i].parentNode.replaceChild(control.element, includes[i]);
             }
-            var control = instantiate(includes[i].getAttribute("data-include"), args);
-            __controls[includes[i].id] = control;
-            for (var ii = 0; ii < includes[i].classList.length; ii++) {
-                control.element.classList.add(includes[i].classList[ii]);
-            }
-            includes[i].parentNode.replaceChild(control.element, includes[i]);
         }
     }
 
     function getControlById(id) {
+        console.log(__controls);
         return __controls[id];
     }
 
     this.GetControlById = getControlById;
+
+    this.GetControls = () => {
+        return __controls;
+    };
 
     var x = document.evaluate('//comment()', document, null, XPathResult.ANY_TYPE, null),
         comment = x.iterateNext();
