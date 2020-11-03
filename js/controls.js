@@ -166,10 +166,74 @@ class Page extends Control {
     }
 }
 
+class WebControlsCustomElement extends HTMLElement {
+    constructor() {
+        super();
+
+        function getParameters(func, name) {
+            var args = new RegExp('(?:' + name + '\\s*|^)\\s*\\((.*?)\\)').exec(func.toString().replace(/\n/g, ''))[1].replace(/\/\*.*?\*\//g, '').replace(/ /g, '');
+            var argArray = args.split(",");
+            return argArray.filter((el) => {
+                return el !== null && el !== "";
+            });
+        }
+
+        console.log('tagname: ' + this.tagName);
+        var cName = WebControls.__getControlName(this.tagName);
+
+        if (cName !== null) {
+            var args = [];
+            if (this.innerHTML) {
+                try {
+                    args = JSON.parse(this.innerHTML);
+                }
+                catch {
+                    args = [];
+                }
+            }
+
+            // this is a somewhat flaky attempt at getting argument names for the constructor, so we can find matching attributes
+            var classStr = eval(cName).toString();
+            classStr = classStr.substring(classStr.indexOf("constructor("));
+            var argNames = getParameters(classStr, "constructor");
+
+            for (var i = 0; i < argNames.length; i++) {
+                var attrValue = this.getAttribute(argNames[i]);
+                if (attrValue !== null) {
+                    if (attrValue.startsWith("json::")) {
+                        args[i] = JSON.parse(attrValue.substring(6));
+                    } else if (attrValue.startsWith("func::")) {
+                        args[i] = eval(attrValue.substring(6));
+                    } else {
+                        args[i] = attrValue;
+                    }
+                }
+            }
+
+            var control = WebControls.__instantiate(cName, args);
+
+            for (var j = 0; j < this.attributes.length; j++) {
+                var attr = this.attributes[j];
+                if (attr.name.indexOf('on') === 0) {
+                    var eventName = attr.name.substring(2);
+                    control.addEventListener(eventName, window[attr.value]);
+                }
+            };
+
+            if (this.id) {
+                WebControls.__addControl(this.id, control);
+            }
+
+            this.parentNode.replaceChild(control.element, this)
+        }
+    }
+}
+
 var WebControls;
 
 (function () {
     console.log('Loading WebControls...');
+    var customElementCount = 0;
     WebControls = this;
     var loadedControls = [];
     var includesDiv = document.createElement("div");
@@ -282,6 +346,18 @@ var WebControls;
                     controlDiv.appendChild(s);
                     includesDiv.appendChild(controlDiv);
 
+                    //let clone = Object.assign(Object.create(Object.getPrototypeOf(WebControlsCustomElement)), WebControlsCustomElement)
+                    var custElement = WebControlsCustomElement.toString().replace("WebControlsCustomElement", "WebControlsCustomElement" + customElementCount);
+                    //console.log(custElement);
+                    var scriptBlock = document.createElement("script");
+                    scriptBlock.innerHTML = custElement;
+                    document.body.appendChild(scriptBlock);
+                    var clone = eval("WebControlsCustomElement" + customElementCount);
+                    customElementCount++;
+                    //console.log(Object.create(Object.getPrototypeOf(WebControlsCustomElement)));
+                    console.log('defining customElement wc-' + controlName.toLowerCase());
+                    customElements.define("wc-" + controlName.toLowerCase(), clone);
+
                     ParseComments(tempDiv, true)
                         .then(() => {
                             if (callback) {
@@ -341,6 +417,20 @@ var WebControls;
 
     this.__instantiate = instantiate;
 
+    this.__getControlName = (elementName) => {
+        elementName = elementName.toLowerCase();
+        if (elementName.indexOf('wc-') === 0) {
+            elementName = elementName.substring(3);
+        }
+
+        for (var i = 0; i < loadedControls.length; i++) {
+            if (loadedControls[i].toLowerCase() === elementName) {
+                return loadedControls[i];
+            }
+        }
+        return null;
+    };
+
     var __controls = {};
 
     function LoadIncludes() {
@@ -381,6 +471,16 @@ var WebControls;
             }
         }
     }
+
+    function __addControl(id, control) {
+        if (__controls[id]) {
+            throw "Control with id " + id + " already exists!";
+        }
+
+        __controls[id] = control;
+    }
+
+    this.__addControl = __addControl;
 
     function getControlById(id) {
         console.log(__controls);
