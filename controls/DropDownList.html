@@ -1,0 +1,69 @@
+<div class="app-control">
+    <style>
+    </style>
+    <select data-control="DropDownList" data-name="lstSelect">
+    </select>
+    <script>
+        class DropDownList extends Control {
+            constructor(dataResponse, selectedValue, valueField, textField) {
+                super();
+                //var lstSelect = this.getElement("lstSelect");
+                var tobj = this;
+                var dataArray = [];
+
+                if (selectedValue == null) {
+                    // no selected value - start with a blank value
+                    dataArray.push({ text: "", value: "" });
+                }
+
+                Promise.resolve(dataResponse)
+                    .then((data) => {
+                        if (Array.isArray(data)) {
+                            dataArray.push(...data);
+                            dataArray.forEach((item) => {
+                                var opt = document.createElement("option");
+                                var value;
+                                var text;
+
+                                if (valueField) {
+                                    if (item[valueField]) {
+                                        value = item[valueField];
+                                    }
+                                }
+
+                                if (textField) {
+                                    if (item[textField]) {
+                                        text = item[textField];
+                                    }
+                                }
+
+                                if (!value) {
+                                    value = item.value;
+                                }
+
+                                if (!text) {
+                                    text = item.text;
+                                }
+
+                                if (selectedValue === value) {
+                                    opt.setAttribute("selected", "true");
+                                }
+
+                                opt.value = value;
+                                opt.innerText = text;
+                                tobj.element.appendChild(opt);
+                            });
+                        }
+                    });
+
+                this.element.addEventListener("change", (e) => {
+                    if (dataArray[e.target.selectedIndex]) {
+                        tobj.triggerEvent("change", e, dataArray[e.target.selectedIndex]);
+                    } else {
+                        tobj.triggerEvent("change", e);
+                    }
+                });
+            }
+        }
+    </script>
+</div>
